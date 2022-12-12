@@ -6,21 +6,21 @@
 
 # 二、 数据分析
 - 本次比赛最新发布的数据集共包含训练集、A榜测试集、B榜测试集三个部分，其中训练集共3000个样本，A榜测试集共200个样本，B榜测试集共200个样本,抽取一部分数据如图：
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x.png)
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x2.png)
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x4.png)
-- 
-- 
+- ![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x.png)
+- ![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x2.png)
+- ![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x4.png)
+- 以上图片分别为原图，放大2倍的标签图片和放大4倍的标签图片
+
 # 三、模型设计
 - 针对图像超分这个任务，我们查阅了相关资料，传统的文本评价标准是以OCR模型识别的准确率来比较的，目的是提高文字识别准确率，但是此次百度网盘的文档超分比赛，评分的标准是PSNR与MS_SSIM，所以该任务属于重建优化的范畴，所以我们选择了基于卷积架构的rcan作为我们此次的baseline,相比于transformer架构的模型，卷积架构会更加稳定。本次比赛要产生原图放大2倍和放大4倍的结果，如果分开计算必然耗时严重，所以我们将两个任务合并。
 
-![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/pipeline.png)
+- [image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/pipeline.png)
 
 - 从网络结构图上可以直观的看出改进后rcan由单分支网络变成了双分支网络，一个分支负责产生放大2倍的结果，一个分支负责产生放大4倍的结果。原始的racn使用了均值漂移的聚类算法，考虑到本次训练数据集的像素值大部分只分布在0和255附近，便删去这一部分。
 
-- 训练数据集的内容分为中文图片和英文图片，考虑到语言之间的差异性以及语言文字的先验性，决定中英文分开训练，所以在测试的时候需要一个二分类模型来判断中文还是英文，我们使用精剪后的vgg来做二分类。
+- 训练数据集的内容分为中文图片和英文图片，考虑到语言之间的差异性以及语言文字的先验性，决定中英文分开训练，所以在测试的时候需要一个二分类模型来判断中文还是英文，我们使用轻量化后的的vgg来做二分类。
 
-![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/vgg.png)
+- [image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/vgg.png)
 
 - 由于分类任务非常容易，所以该网络只由几层卷积构成。
 
