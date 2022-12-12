@@ -6,21 +6,21 @@
 
 # 二、 数据分析
 - 本次比赛最新发布的数据集共包含训练集、A榜测试集、B榜测试集三个部分，其中训练集共3000个样本，A榜测试集共200个样本，B榜测试集共200个样本,抽取一部分数据如图：
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocRemoveCover_top3/blob/master/illustration/0_IMG_20220705_103123_a.jpg)
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocRemoveCover_top3/blob/master/illustration/0_IMG_20220705_103123_a_0_000.jpg)
-![image](https://github.com/Jwtcode/BaiduDiskAI_DocRemoveCover_top3/blob/master/illustration/0_IMG_20220705_103123_a_0_000.png)
-- hand,head 为带有手指、人头遮挡数据及遮挡部位分割图，gt 为非遮挡图片（仅有训练集数据提供gt ，A榜测试集、B榜测试集数据均不提供gt);
-- annotation.txt 为图片对应关系，每一行为一组样本，用空格分隔，分别为非遮挡图片、遮挡图片、分割图片;
+![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x.png)
+![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x2.png)
+![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/x4.png)
+- 
+- 
 # 三、模型设计
 - 针对图像超分这个任务，我们查阅了相关资料，传统的文本评价标准是以OCR模型识别的准确率来比较的，目的是提高文字识别准确率，但是此次百度网盘的文档超分比赛，评分的标准是PSNR与MS_SSIM，所以该任务属于重建优化的范畴，所以我们选择了基于卷积架构的rcan作为我们此次的baseline,相比于transformer架构的模型，卷积架构会更加稳定。本次比赛要产生原图放大2倍和放大4倍的结果，如果分开计算必然耗时严重，所以我们将两个任务合并。
 
-![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocRemoveCover_top3/blob/master/illustration/pipeline.png)
+![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/pipeline.png)
 
 - 从网络结构图上可以直观的看出改进后rcan由单分支网络变成了双分支网络，一个分支负责产生放大2倍的结果，一个分支负责产生放大4倍的结果。原始的racn使用了均值漂移的聚类算法，考虑到本次训练数据集的像素值大部分只分布在0和255附近，便删去这一部分。
 
 - 训练数据集的内容分为中文图片和英文图片，考虑到语言之间的差异性以及语言文字的先验性，决定中英文分开训练，所以在测试的时候需要一个二分类模型来判断中文还是英文，我们使用精剪后的vgg来做二分类。
 
-![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocRemoveCover_top3/blob/master/illustration/pipeline.png)
+![](![image](https://github.com/Jwtcode/BaiduDiskAI_DocImageSuperResolution_top1/blob/main/illustration/vgg.png)
 
 - 由于分类任务非常容易，所以该网络只由几层卷积构成。
 
@@ -49,5 +49,5 @@
 # 六、测试细节
 - 测试图片预先全部输入到二分类模型中，得到包含中文图片路径的list和包含英文图片路径的list
 - 中文图片路径的list送入到中文模型中，英文图片路径的list送入到英文模型中
-- 在测试中我们输入到模型中的尺寸为256X256,由于我们将原图裁剪，所以图片边缘的处理尤为重要，我们采用overlap的方法，使图片patches之间的重叠部分为24，这就保证了在图片patcher复位的过程中前一个patch取到重叠区域的一半，也就是12个像素长度，后一个patch从重叠区域的一半开始取，这就保证了patches边缘在复位的时候可以很好的过渡。
+- 在测试中我们输入到模型中的尺寸为256X256,由于我们将原图裁剪，所以图片边缘的处理尤为重要，我们采用overlap的方法，使图片patches之间的重叠部分为24，这就保证了在图片patches复位的过程中前一个patch取到重叠区域的一半，也就是12个像素长度，后一个patch从重叠区域的一半开始取，这就保证了patches边缘在复位的时候可以很好的过渡。
 - 整个推理过程为串行
